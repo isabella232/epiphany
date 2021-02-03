@@ -665,7 +665,7 @@ window_object_cleared_cb (WebKitScriptWorld       *world,
   js_context = webkit_frame_get_js_context_for_script_world (frame, world);
   jsc_context_push_exception_handler (js_context, (JSCExceptionHandler)js_exception_handler, NULL, NULL);
 
-g_warning("%s: extension=%p world=%s page=%lu frame=%lu js_context=%p", __FUNCTION__, extension, webkit_script_world_get_name (world), webkit_web_page_get_id (page), webkit_frame_get_id (frame), js_context);
+  g_warning ("%s: extension=%p world=%s page=%lu frame=%lu js_context=%p", __FUNCTION__, extension, webkit_script_world_get_name (world), webkit_web_page_get_id (page), webkit_frame_get_id (frame), js_context);
   set_up_webextensions (extension, page, js_context);
 
   bytes = g_resources_lookup_data ("/org/gnome/epiphany-web-process-extension/js/ephy.js", G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
