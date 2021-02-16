@@ -88,6 +88,7 @@ struct _EphyWebView {
   char *display_address;
   char *typed_address;
   char *last_committed_address;
+  char *last_nonempty_address;
   char *loading_message;
   char *link_message;
   GdkPixbuf *icon;
@@ -784,6 +785,11 @@ ephy_web_view_set_address (EphyWebView *view,
   if (!was_empty && ephy_web_view_is_loading (view) && view->typed_address != NULL)
     ephy_web_view_set_typed_address (view, NULL);
 
+  if (g_strcmp0 (address, "")) {
+    g_free (view->last_nonempty_address);
+    view->last_nonempty_address = g_strdup (address);
+  }
+
   g_object_notify_by_pspec (object, obj_properties[PROP_ADDRESS]);
   g_object_notify_by_pspec (object, obj_properties[PROP_DISPLAY_ADDRESS]);
 }
@@ -829,7 +835,7 @@ process_terminated_cb (EphyWebView                       *web_view,
   }
 
   if (!ephy_embed_has_load_pending (EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view))) {
-    ephy_web_view_load_error_page (web_view, ephy_web_view_get_address (web_view),
+    ephy_web_view_load_error_page (web_view, web_view->last_nonempty_address,
                                    EPHY_WEB_VIEW_ERROR_PROCESS_CRASH, NULL, NULL);
   }
 }
@@ -3753,6 +3759,7 @@ ephy_web_view_finalize (GObject *object)
   g_free (view->display_address);
   g_free (view->typed_address);
   g_free (view->last_committed_address);
+  g_free (view->last_nonempty_address);
   g_free (view->link_message);
   g_free (view->loading_message);
   g_free (view->tls_error_failing_uri);
