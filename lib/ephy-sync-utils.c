@@ -27,7 +27,6 @@
 #include <glib/gi18n.h>
 #include <inttypes.h>
 #include <json-glib/json-glib.h>
-#include <libsoup/soup.h>
 #include <stdio.h>
 #include <string.h>
 #if defined(__linux__)
@@ -200,27 +199,22 @@ ephy_sync_utils_generate_random_bytes (void   *random_ctx,
 char *
 ephy_sync_utils_get_audience (const char *url)
 {
-  SoupURI *uri;
+  g_autoptr (GUri) uri = NULL;
   const char *scheme;
   const char *host;
+  int port;
   char *audience;
-  char *port;
 
   g_assert (url);
 
-  uri = soup_uri_new (url);
-  scheme = soup_uri_get_scheme (uri);
-  host = soup_uri_get_host (uri);
-  /* soup_uri_get_port returns the default port if URI does not have any port. */
-  port = g_strdup_printf (":%u", soup_uri_get_port (uri));
-
-  if (g_strstr_len (url, -1, port))
-    audience = g_strdup_printf ("%s://%s%s", scheme, host, port);
+  uri = g_uri_parse (url, G_URI_FLAGS_NONE, NULL);
+  scheme = g_uri_get_scheme (uri);
+  host = g_uri_get_host (uri);
+  port = g_uri_get_port (uri);
+  if (port != -1)
+    audience = g_strdup_printf ("%s://%s:%d", scheme, host, port);
   else
     audience = g_strdup_printf ("%s://%s", scheme, host);
-
-  g_free (port);
-  soup_uri_free (uri);
 
   return audience;
 }
